@@ -20,7 +20,6 @@ import {
   Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { QuickVerifyDialog } from '@/components/verification/quick-verify-dialog';
 
@@ -42,22 +41,15 @@ const adminNavigation = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { profile, isAdmin } = useUser();
+  const { isAdmin, logout } = useUser();
   const router = useRouter();
   const [quickVerifyOpen, setQuickVerifyOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
-  };
 
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900">
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center px-6">
-        <h1 className="text-xl font-bold text-white">Cascadia</h1>
+        <h1 className="text-xl font-bold text-white">Avencare</h1>
       </div>
 
       {/* Quick Verify Button */}
@@ -129,20 +121,12 @@ export function Sidebar() {
           )}
         </ul>
 
-        {/* User info and sign out */}
+        {/* Sign out */}
         <div className="mt-auto pt-4 border-t border-gray-800">
-          <div className="px-3 py-2">
-            <p className="text-sm font-medium text-white truncate">
-              {profile?.full_name || profile?.email}
-            </p>
-            <p className="text-xs text-gray-500 capitalize">
-              {profile?.role}
-            </p>
-          </div>
           <Button
             variant="ghost"
             className="w-full justify-start gap-x-3 px-3 text-gray-400 hover:bg-gray-800 hover:text-white"
-            onClick={handleSignOut}
+            onClick={logout}
           >
             <LogOut className="h-5 w-5" />
             Sign out

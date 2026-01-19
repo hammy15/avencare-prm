@@ -2,16 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,14 +21,16 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
       });
 
-      if (signInError) {
-        throw signInError;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Invalid password');
       }
 
       router.push('/');
@@ -42,11 +43,16 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Cascadia License Check</CardTitle>
+    <Card className="w-full max-w-sm">
+      <CardHeader className="space-y-1 text-center">
+        <div className="flex justify-center mb-2">
+          <div className="p-3 bg-primary/10 rounded-full">
+            <Lock className="h-6 w-6 text-primary" />
+          </div>
+        </div>
+        <CardTitle className="text-2xl font-bold">Avencare License Check</CardTitle>
         <CardDescription>
-          Sign in to access the license verification system
+          Enter password to access the system
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -58,28 +64,16 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
+              autoFocus
             />
           </div>
 

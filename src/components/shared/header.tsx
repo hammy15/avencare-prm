@@ -1,8 +1,7 @@
 'use client';
 
-import { useUser } from '@/hooks/use-user';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { getInitials } from '@/lib/utils';
+import { User } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
@@ -11,8 +10,6 @@ interface HeaderProps {
 }
 
 export function Header({ title, description, actions }: HeaderProps) {
-  const { profile } = useUser();
-
   return (
     <header className="border-b border-gray-200 bg-white px-6 py-4">
       <div className="flex items-center justify-between">
@@ -25,13 +22,8 @@ export function Header({ title, description, actions }: HeaderProps) {
         <div className="flex items-center gap-4">
           {actions}
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-gray-200 text-gray-600 text-sm">
-              {profile?.full_name
-                ? getInitials(
-                    profile.full_name.split(' ')[0] || '',
-                    profile.full_name.split(' ')[1] || ''
-                  )
-                : profile?.email?.charAt(0).toUpperCase()}
+            <AvatarFallback className="bg-gray-200 text-gray-600">
+              <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
         </div>

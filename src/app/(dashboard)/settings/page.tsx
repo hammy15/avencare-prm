@@ -17,7 +17,7 @@ interface OCRStatus {
 }
 
 export default function SettingsPage() {
-  const { profile, isAdmin } = useUser();
+  const { isAdmin } = useUser();
   const [ocrStatus, setOcrStatus] = useState<OCRStatus | null>(null);
   const [isTestingCron, setIsTestingCron] = useState(false);
 
@@ -77,18 +77,14 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium">{profile?.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Name</p>
-                <p className="font-medium">{profile?.full_name || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Role</p>
+                <p className="text-sm text-gray-500">Access Level</p>
                 <Badge variant="outline" className="capitalize mt-1">
-                  {profile?.role}
+                  Administrator
                 </Badge>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Authentication</p>
+                <p className="font-medium">Password Protected</p>
               </div>
             </CardContent>
           </Card>
@@ -211,6 +207,8 @@ export default function SettingsPage() {
               <p>NEXT_PUBLIC_SUPABASE_URL=</p>
               <p>NEXT_PUBLIC_SUPABASE_ANON_KEY=</p>
               <p>SUPABASE_SERVICE_ROLE_KEY=</p>
+              <p className="text-green-600 mt-4"># Authentication</p>
+              <p>APP_PASSWORD=</p>
               <p className="text-green-600 mt-4"># Cron Security</p>
               <p>CRON_SECRET=</p>
               <p className="text-green-600 mt-4"># OCR (optional)</p>
@@ -218,10 +216,6 @@ export default function SettingsPage() {
               <p>AZURE_VISION_ENDPOINT=</p>
               <p>AZURE_VISION_KEY=</p>
               <p>GOOGLE_VISION_API_KEY=</p>
-              <p className="text-green-600 mt-4"># Nursys e-Notify (optional)</p>
-              <p>NURSYS_ENOTIFY_API_URL=</p>
-              <p>NURSYS_ENOTIFY_API_KEY=</p>
-              <p>NURSYS_ENOTIFY_ORG_ID=</p>
             </div>
           </CardContent>
         </Card>
