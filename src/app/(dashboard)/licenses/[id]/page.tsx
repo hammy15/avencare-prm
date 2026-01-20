@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/shared/header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LicenseDialog } from '@/components/licenses/license-dialog';
 import { RecordVerificationDialog } from '@/components/licenses/record-verification-dialog';
 import { ConfirmDialog } from '@/components/shared/confirm-dialog';
-import { StatusBadge } from '@/components/shared/status-badge';
+import { StatusBadge, StateBadge, CredentialBadge, EligibilityBadge } from '@/components/shared/status-badge';
 import { useUser } from '@/hooks/use-user';
 import { formatName, formatDate, formatDateTime } from '@/lib/utils';
-import { ArrowLeft, Edit, Archive, ArchiveRestore, ExternalLink, User, MapPin, FileCheck, History, ClipboardList, Search, CheckCircle, Zap, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit, Archive, ArchiveRestore, ExternalLink, User, MapPin, FileCheck, History, ClipboardList, Search, CheckCircle, Zap, Loader2, Shield, AlertTriangle, Calendar, Clock } from 'lucide-react';
 import { LoadingPage } from '@/components/shared/loading';
 import { toast } from 'sonner';
 import type { License, Person, Verification, VerificationTask, VerificationSource, Profile } from '@/types/database';
@@ -24,6 +24,33 @@ type LicenseWithRelations = License & {
   verifications: (Verification & { source: VerificationSource | null; verifier: Profile | null })[];
   tasks: (VerificationTask & { source: VerificationSource | null; assignee: Profile | null })[];
 };
+
+// Helper to determine eligibility
+function getEligibility(license: License): 'eligible' | 'ineligible' | 'needs-review' {
+  if (license.status === 'active' && !license.archived) {
+    return 'eligible';
+  }
+  if (license.status === 'expired' || license.status === 'flagged' || license.archived) {
+    return 'ineligible';
+  }
+  return 'needs-review';
+}
+
+// Helper to check if expiring soon (within 30 days)
+function isExpiringSoon(date: string | null): boolean {
+  if (!date) return false;
+  const expDate = new Date(date);
+  const thirtyDaysFromNow = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  return expDate <= thirtyDaysFromNow && expDate > new Date();
+}
+
+// Helper to check if verification is stale (older than 30 days)
+function isVerificationStale(date: string | null): boolean {
+  if (!date) return true;
+  const verifyDate = new Date(date);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  return verifyDate < thirtyDaysAgo;
+}
 
 export default function LicenseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -193,11 +220,16 @@ export default function LicenseDetailPage({ params }: { params: Promise<{ id: st
     return null;
   }
 
+  const eligibility = getEligibility(license);
+  const expiringSoon = isExpiringSoon(license.expiration_date);
+  const verificationStale = isVerificationStale(license.last_verified_at);
+
   return (
     <div className="flex flex-col h-full">
       <Header
-        title={`${license.credential_type} License - ${license.state}`}
-        description={`#${license.license_number}`}
+        title={`${license.credential_type} License`}
+        description={`${license.state} • #${license.license_number}`}
+        gradient
         actions={
           isAdmin && (
             <div className="flex gap-2">
@@ -230,67 +262,160 @@ export default function LicenseDetailPage({ params }: { params: Promise<{ id: st
         {/* Back link */}
         <Link
           href="/licenses"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Licenses
         </Link>
 
-        {license.archived && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-            <p className="text-sm text-orange-800">
-              This license is archived.
-              {license.archived_reason && ` Reason: ${license.archived_reason}`}
-            </p>
-          </div>
-        )}
+        {/* Alert banners */}
+        <div className="space-y-3">
+          {license.archived && (
+            <div className="bg-muted/50 border border-border rounded-lg p-4 flex items-center gap-3">
+              <Archive className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">This license is archived</p>
+                {license.archived_reason && (
+                  <p className="text-sm text-muted-foreground">Reason: {license.archived_reason}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {eligibility === 'ineligible' && !license.archived && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-status-expired" />
+              <div>
+                <p className="text-sm font-medium text-status-expired">Not Eligible for Staffing</p>
+                <p className="text-sm text-red-600">
+                  This license {license.status === 'expired' ? 'has expired' : 'is flagged'} and cannot be used for staffing.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {expiringSoon && !license.archived && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-status-pending" />
+              <div>
+                <p className="text-sm font-medium text-amber-800">Expiring Soon</p>
+                <p className="text-sm text-amber-600">
+                  This license expires on {formatDate(license.expiration_date)}. Consider renewal.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {verificationStale && !license.archived && eligibility !== 'ineligible' && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3">
+              <Clock className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-blue-800">Verification Needed</p>
+                <p className="text-sm text-blue-600">
+                  {license.last_verified_at
+                    ? `Last verified ${formatDate(license.last_verified_at)}. Consider re-verifying.`
+                    : 'This license has never been verified.'}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Compliance Summary Card */}
+        <Card className="border-2">
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
+                  <Shield className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Eligibility</p>
+                  <EligibilityBadge eligibility={eligibility} className="mt-0.5" />
+                </div>
+              </div>
+
+              <div className="h-10 w-px bg-border" />
+
+              <div>
+                <p className="text-sm text-muted-foreground">Credential</p>
+                <CredentialBadge type={license.credential_type} className="mt-0.5" />
+              </div>
+
+              <div className="h-10 w-px bg-border" />
+
+              <div>
+                <p className="text-sm text-muted-foreground">State</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <StateBadge state={license.state} />
+                  {license.is_compact && (
+                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                      Compact
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="h-10 w-px bg-border" />
+
+              <div>
+                <p className="text-sm text-muted-foreground">Status</p>
+                <StatusBadge status={license.status} className="mt-0.5" />
+              </div>
+
+              <div className="h-10 w-px bg-border hidden lg:block" />
+
+              <div className="hidden lg:block">
+                <p className="text-sm text-muted-foreground">License Number</p>
+                <code className="text-sm font-medium bg-muted px-2 py-0.5 rounded mt-0.5 inline-block">
+                  {license.license_number}
+                </code>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* License Details */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileCheck className="h-5 w-5" />
+                <FileCheck className="h-5 w-5 text-primary" />
                 License Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <p className="text-sm text-gray-500">Status</p>
-                <StatusBadge status={license.status} className="mt-1" />
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Credential Type</p>
+                <p className="font-medium mt-1">{license.credential_type}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Credential Type</p>
-                <p className="font-medium">{license.credential_type}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">State</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{license.state}</span>
+                </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500">State</p>
-                <p className="font-medium flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-gray-400" />
-                  {license.state}
-                  {license.is_compact && (
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                      Compact
-                    </span>
-                  )}
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">License Number</p>
+                <code className="font-medium font-mono mt-1 block">{license.license_number}</code>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Expiration Date</p>
+                <p className={`font-medium mt-1 ${expiringSoon ? 'text-status-pending' : license.status === 'expired' ? 'text-status-expired' : ''}`}>
+                  {formatDate(license.expiration_date) || 'Not set'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">License Number</p>
-                <p className="font-medium font-mono">{license.license_number}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Expiration Date</p>
-                <p className="font-medium">{formatDate(license.expiration_date)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Last Verified</p>
-                <p className="font-medium">{formatDateTime(license.last_verified_at)}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Last Verified</p>
+                <p className={`font-medium mt-1 ${verificationStale ? 'text-muted-foreground' : 'text-status-active'}`}>
+                  {license.last_verified_at ? formatDateTime(license.last_verified_at) : 'Never'}
+                </p>
               </div>
               {license.notes && (
                 <div>
-                  <p className="text-sm text-gray-500">Notes</p>
-                  <p className="text-sm whitespace-pre-wrap">{license.notes}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Notes</p>
+                  <p className="text-sm whitespace-pre-wrap mt-1">{license.notes}</p>
                 </div>
               )}
             </CardContent>
@@ -300,7 +425,7 @@ export default function LicenseDetailPage({ params }: { params: Promise<{ id: st
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-5 w-5 text-primary" />
                 License Holder
               </CardTitle>
             </CardHeader>
@@ -308,21 +433,21 @@ export default function LicenseDetailPage({ params }: { params: Promise<{ id: st
               {license.person ? (
                 <Link
                   href={`/people/${license.person.id}`}
-                  className="block p-4 rounded-lg border hover:border-gray-300 transition-colors"
+                  className="block p-4 rounded-lg border border-border hover:border-primary/50 hover:bg-accent/50 transition-all"
                 >
                   <p className="font-medium text-lg">
                     {formatName(license.person.first_name, license.person.last_name)}
                   </p>
                   {license.person.email && (
-                    <p className="text-sm text-gray-500">{license.person.email}</p>
+                    <p className="text-sm text-muted-foreground">{license.person.email}</p>
                   )}
-                  <p className="text-sm text-blue-600 mt-2 flex items-center gap-1">
+                  <p className="text-sm text-primary mt-2 flex items-center gap-1">
                     View profile
                     <ExternalLink className="h-3 w-3" />
                   </p>
                 </Link>
               ) : (
-                <p className="text-sm text-gray-500">No person associated</p>
+                <p className="text-sm text-muted-foreground">No person associated</p>
               )}
             </CardContent>
           </Card>
@@ -331,24 +456,25 @@ export default function LicenseDetailPage({ params }: { params: Promise<{ id: st
           <Card>
             <CardHeader>
               <CardTitle>Verification Summary</CardTitle>
+              <CardDescription>Overview of verification activity</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Total Verifications</span>
-                <span className="font-medium">{license.verifications?.length || 0}</span>
+                <span className="text-sm text-muted-foreground">Total Verifications</span>
+                <span className="font-semibold">{license.verifications?.length || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Pending Tasks</span>
-                <span className="font-medium">
+                <span className="text-sm text-muted-foreground">Pending Tasks</span>
+                <span className="font-semibold">
                   {license.tasks?.filter((t) => t.status === 'pending').length || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">Last Result</span>
+                <span className="text-sm text-muted-foreground">Last Result</span>
                 {license.verifications?.[0] ? (
                   <StatusBadge status={license.verifications[0].result} />
                 ) : (
-                  <span className="text-gray-400">-</span>
+                  <span className="text-muted-foreground">-</span>
                 )}
               </div>
             </CardContent>

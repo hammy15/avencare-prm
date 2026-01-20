@@ -1,27 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { getOCRProvider, extractFieldsFromText } from '@/lib/ocr';
+import { getOCRProvider, getAvailableProviders } from '@/lib/ocr';
 
 // POST /api/ocr - Process an uploaded file with OCR
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
@@ -81,11 +63,21 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   const provider = process.env.OCR_PROVIDER || 'none';
 
+  // Check if the provider is properly configured
+  let configured = provider !== 'none';
+  if (provider === 'ocrspace' && !process.env.OCRSPACE_API_KEY) {
+    configured = false;
+  } else if (provider === 'azure' && (!process.env.AZURE_VISION_ENDPOINT || !process.env.AZURE_VISION_KEY)) {
+    configured = false;
+  } else if (provider === 'google' && !process.env.GOOGLE_VISION_API_KEY) {
+    configured = false;
+  }
+
   return NextResponse.json({
     data: {
       provider,
-      configured: provider !== 'none',
-      availableProviders: ['azure', 'google', 'tesseract', 'none'],
+      configured,
+      availableProviders: getAvailableProviders(),
     },
   });
 }

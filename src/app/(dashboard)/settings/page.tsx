@@ -212,9 +212,13 @@ export default function SettingsPage() {
               <p className="text-green-600 mt-4"># Cron Security</p>
               <p>CRON_SECRET=</p>
               <p className="text-green-600 mt-4"># OCR (optional)</p>
-              <p>OCR_PROVIDER=azure|google|tesseract|none</p>
+              <p>OCR_PROVIDER=ocrspace|azure|google|tesseract|none</p>
+              <p className="text-green-600 mt-2"># OCR.space (recommended)</p>
+              <p>OCRSPACE_API_KEY=</p>
+              <p className="text-green-600 mt-2"># Azure Computer Vision</p>
               <p>AZURE_VISION_ENDPOINT=</p>
               <p>AZURE_VISION_KEY=</p>
+              <p className="text-green-600 mt-2"># Google Cloud Vision</p>
               <p>GOOGLE_VISION_API_KEY=</p>
             </div>
           </CardContent>

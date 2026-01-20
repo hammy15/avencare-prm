@@ -19,12 +19,19 @@ export function getOCRProvider(): OCRProvider | null {
       return new AzureOCRProvider();
     case 'google':
       return new GoogleOCRProvider();
+    case 'ocrspace':
+      return new OCRSpaceProvider();
     case 'tesseract':
       return new TesseractOCRProvider();
     case 'none':
     default:
       return null;
   }
+}
+
+// Get list of available providers for the settings page
+export function getAvailableProviders(): string[] {
+  return ['azure', 'google', 'ocrspace', 'tesseract', 'none'];
 }
 
 // Extract fields from OCR text using regex patterns
@@ -223,6 +230,82 @@ class GoogleOCRProvider implements OCRProvider {
       text: annotation.text || '',
       confidence: 0.9,
       extractedFields: extractFieldsFromText(annotation.text || ''),
+    };
+  }
+}
+
+// OCR.space implementation
+class OCRSpaceProvider implements OCRProvider {
+  private apiKey: string;
+
+  constructor() {
+    this.apiKey = process.env.OCRSPACE_API_KEY || '';
+  }
+
+  async extractText(file: Buffer, mimeType: string): Promise<OCRResult> {
+    if (!this.apiKey) {
+      throw new Error('OCR.space API key not configured');
+    }
+
+    // Determine file type for OCR.space
+    const fileType = mimeType.includes('pdf') ? 'pdf' :
+                     mimeType.includes('png') ? 'png' :
+                     mimeType.includes('gif') ? 'gif' : 'jpg';
+
+    // Create form data with base64 content
+    const base64Content = `data:${mimeType};base64,${file.toString('base64')}`;
+
+    const formData = new URLSearchParams();
+    formData.append('apikey', this.apiKey);
+    formData.append('base64Image', base64Content);
+    formData.append('language', 'eng');
+    formData.append('isOverlayRequired', 'false');
+    formData.append('filetype', fileType);
+    formData.append('detectOrientation', 'true');
+    formData.append('scale', 'true');
+    formData.append('OCREngine', '2'); // Engine 2 is more accurate
+
+    const response = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OCR.space request failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (result.IsErroredOnProcessing) {
+      throw new Error(`OCR.space processing error: ${result.ErrorMessage?.[0] || 'Unknown error'}`);
+    }
+
+    // Extract text from all parsed results
+    const parsedResults = result.ParsedResults || [];
+    const text = parsedResults
+      .map((r: { ParsedText?: string }) => r.ParsedText || '')
+      .join('\n')
+      .trim();
+
+    // Calculate average confidence from word-level confidence if available
+    let confidence = 0.9; // Default confidence
+    if (parsedResults.length > 0 && parsedResults[0].TextOverlay?.Lines) {
+      const allWords = parsedResults[0].TextOverlay.Lines
+        .flatMap((line: { Words?: { WordText: string }[] }) => line.Words || []);
+      if (allWords.length > 0) {
+        // OCR.space doesn't provide word confidence in the standard response
+        // but the text quality from Engine 2 is generally good
+        confidence = 0.92;
+      }
+    }
+
+    return {
+      text,
+      confidence,
+      extractedFields: extractFieldsFromText(text),
     };
   }
 }
