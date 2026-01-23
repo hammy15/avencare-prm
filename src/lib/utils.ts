@@ -1,136 +1,66 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format, formatDistanceToNow, isAfter, isBefore, addDays } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-/**
- * Format a date for display
- */
-export function formatDate(date: string | Date | null | undefined): string {
-  if (!date) return '-';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return format(d, 'MMM d, yyyy');
+// Format number with commas
+export function formatNumber(num: number): string {
+  return new Intl.NumberFormat('en-US').format(num)
 }
 
-/**
- * Format a date with time
- */
-export function formatDateTime(date: string | Date | null | undefined): string {
-  if (!date) return '-';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return format(d, 'MMM d, yyyy h:mm a');
+// Format currency
+export function formatCurrency(num: number, currency = 'USD'): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num)
 }
 
-/**
- * Format a date as relative time
- */
-export function formatRelative(date: string | Date | null | undefined): string {
-  if (!date) return '-';
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return formatDistanceToNow(d, { addSuffix: true });
+// Format percentage
+export function formatPercent(num: number, decimals = 1): string {
+  return `${num.toFixed(decimals)}%`
 }
 
-/**
- * Check if a license is expiring soon (within 90 days)
- */
-export function isExpiringSoon(expirationDate: string | Date | null | undefined): boolean {
-  if (!expirationDate) return false;
-  const d = typeof expirationDate === 'string' ? new Date(expirationDate) : expirationDate;
-  const now = new Date();
-  const threshold = addDays(now, 90);
-  return isAfter(d, now) && isBefore(d, threshold);
+// Format date
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    ...options,
+  }).format(d)
 }
 
-/**
- * Check if a license is expired
- */
-export function isExpired(expirationDate: string | Date | null | undefined): boolean {
-  if (!expirationDate) return false;
-  const d = typeof expirationDate === 'string' ? new Date(expirationDate) : expirationDate;
-  return isBefore(d, new Date());
+// Truncate text
+export function truncate(str: string, length: number): string {
+  if (str.length <= length) return str
+  return str.slice(0, length) + '...'
 }
 
-/**
- * Format a full name
- */
-export function formatName(firstName: string, lastName: string): string {
-  return `${firstName} ${lastName}`.trim();
-}
-
-/**
- * Format a phone number
- */
-export function formatPhone(phone: string | null | undefined): string {
-  if (!phone) return '-';
-  // Remove all non-digits
-  const digits = phone.replace(/\D/g, '');
-  // Format as (XXX) XXX-XXXX
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  return phone;
-}
-
-/**
- * Truncate text with ellipsis
- */
-export function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 3) + '...';
-}
-
-/**
- * Get initials from a name
- */
-export function getInitials(firstName: string, lastName: string): string {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-}
-
-/**
- * Debounce function
- */
-export function debounce<T extends (...args: Parameters<T>) => ReturnType<T>>(
-  fn: T,
-  delay: number
+// Debounce function
+export function debounce<T extends (...args: unknown[]) => unknown>(
+  func: T,
+  wait: number
 ): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout;
+  let timeout: NodeJS.Timeout | null = null
+
   return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
-  };
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), wait)
+  }
 }
 
-/**
- * Generate a random ID
- */
-export function generateId(): string {
-  return crypto.randomUUID();
-}
-
-/**
- * Sleep for a given duration
- */
+// Sleep/delay
 export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-/**
- * Check if we're running on the server
- */
-export function isServer(): boolean {
-  return typeof window === 'undefined';
-}
-
-/**
- * Parse query string parameters
- */
-export function parseQueryParams(searchParams: URLSearchParams): Record<string, string> {
-  const params: Record<string, string> = {};
-  searchParams.forEach((value, key) => {
-    params[key] = value;
-  });
-  return params;
+// Generate random ID
+export function generateId(length = 8): string {
+  return Math.random().toString(36).substring(2, 2 + length)
 }
