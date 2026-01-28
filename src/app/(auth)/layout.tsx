@@ -28,15 +28,15 @@ export default function AuthLayout({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold text-white">Cascadia Healthcare</span>
+              <span className="text-2xl font-bold text-white">Avencare PRM</span>
             </div>
             <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
-              License Verification
+              Admission Packet
               <br />
-              <span className="text-teal-200">For Post-Acute Care</span>
+              <span className="text-teal-200">Verification System</span>
             </h1>
             <p className="text-lg text-teal-100/80 max-w-md">
-              Verify CNA, LPN, RN and other healthcare credentials for your post-acute care team.
+              Verify credentials and compliance for hospice and palliative care admissions.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ export default function AuthLayout({
 
         {/* Bottom branding */}
         <div className="absolute bottom-8 left-12 xl:left-20 text-teal-200/60 text-sm">
-          © 2026 Cascadia Healthcare. All rights reserved.
+          © 2026 Avencare. All rights reserved.
         </div>
       </div>
 
