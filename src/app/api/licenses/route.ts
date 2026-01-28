@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
     query = query.eq('archived', archived);
 
     if (search) {
-      query = query.or(`license_number.ilike.%${search}%,person.first_name.ilike.%${search}%,person.last_name.ilike.%${search}%`);
+      // Simple search on license_number only - related table searches don't work with or()
+      query = query.ilike('license_number', `%${search}%`);
     }
     if (status) {
       query = query.eq('status', status);
