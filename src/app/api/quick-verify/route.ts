@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auditLog } from '@/lib/audit';
 import { z } from 'zod';
 
@@ -31,22 +31,9 @@ const quickVerifySchema = z.object({
 // POST /api/quick-verify - Create person, license, and verification in one transaction
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Auth is handled by middleware (cookie-based)
 
     const body = await request.json();
     const validation = quickVerifySchema.safeParse(body);
@@ -132,7 +119,7 @@ export async function POST(request: NextRequest) {
         expiration_found: verificationData.expiration_found || null,
         unencumbered: verificationData.unencumbered,
         notes: verificationData.notes || null,
-        verified_by: user.id,
+        verified_by: null, // Using cookie-based auth
       })
       .select()
       .single();

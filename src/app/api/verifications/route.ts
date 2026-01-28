@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auditLog } from '@/lib/audit';
 import { z } from 'zod';
 
@@ -27,7 +27,7 @@ const createVerificationSchema = z.object({
 // GET /api/verifications - List verification history
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
 
     const licenseId = searchParams.get('licenseId');
@@ -90,22 +90,9 @@ export async function GET(request: NextRequest) {
 // POST /api/verifications - Create a manual verification record
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Auth is handled by middleware (cookie-based)
 
     const body = await request.json();
     const validation = createVerificationSchema.safeParse(body);
@@ -132,7 +119,7 @@ export async function POST(request: NextRequest) {
         unencumbered,
         notes: notes || null,
         evidence_url: evidence_url || null,
-        verified_by: user.id,
+        verified_by: null, // Using cookie-based auth
         raw_response: synced_data || null,
       })
       .select(`

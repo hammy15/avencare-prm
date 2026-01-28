@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auditLog } from '@/lib/audit';
 import { z } from 'zod';
 
@@ -18,7 +18,7 @@ const createLicenseSchema = z.object({
 // GET /api/licenses - List all licenses
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
 
     const search = searchParams.get('search');
@@ -83,23 +83,9 @@ export async function GET(request: NextRequest) {
 // POST /api/licenses - Create a new license
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Check if user is admin
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Auth is handled by middleware (cookie-based)
 
     // Parse and validate request body
     const body = await request.json();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auditLog } from '@/lib/audit';
 import { verifyLicense, hasScraperForState, getAvailableStates } from '@/lib/scrapers';
 
@@ -10,24 +10,9 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
-    // Check authentication
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check admin role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Auth is handled by middleware (cookie-based)
 
     // Get the license with person info
     const { data: license, error: licenseError } = await supabase
@@ -94,7 +79,7 @@ export async function POST(
           expiration_found: result.expirationDate || null,
           unencumbered: result.unencumbered,
           notes: `Auto-verified via web scraper. Raw data: ${JSON.stringify(result.rawData || {})}`,
-          verified_by: user.id,
+          verified_by: null, // Using cookie-based auth
           raw_response: result.rawData || null,
         })
         .select()
@@ -190,7 +175,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Get the license
     const { data: license, error } = await supabase
