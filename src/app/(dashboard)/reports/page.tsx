@@ -1,4 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/server';
+
+export const dynamic = 'force-dynamic';
 import { Header } from '@/components/shared/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReportActions } from '@/components/reports/report-actions';
