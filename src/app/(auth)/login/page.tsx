@@ -50,9 +50,9 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-teal-600 rounded-xl flex items-center justify-center">
             <Shield className="w-7 h-7 text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-900">Avencare</span>
+          <span className="text-2xl font-bold text-gray-900">Cascadia Healthcare</span>
         </div>
-        <p className="text-gray-600">License Verification System</p>
+        <p className="text-gray-600">License Verification for Post-Acute Care</p>
       </div>
 
       <Card className="border-0 shadow-xl shadow-gray-200/50">

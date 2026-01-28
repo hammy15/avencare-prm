@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('verifications')
       .select(
-        '*, license:licenses(*, person:people(*)), source:verification_sources(*), verifier:profiles!verified_by(full_name, email)',
+        '*, license:licenses(*, person:people(*)), source:verification_sources(*)',
         { count: 'exact' }
       );
 
@@ -124,8 +124,7 @@ export async function POST(request: NextRequest) {
       })
       .select(`
         *,
-        source:verification_sources(*),
-        verifier:profiles!verified_by(full_name, email)
+        source:verification_sources(*)
       `)
       .single();
 

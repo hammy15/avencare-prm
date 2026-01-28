@@ -79,7 +79,7 @@ export default async function HomePage() {
                 <div className="p-3 bg-white/20 backdrop-blur rounded-xl">
                   <Shield className="h-8 w-8 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-white">Avencare License Check</h1>
+                <h1 className="text-3xl font-bold text-white">Cascadia License Check</h1>
               </div>
               <p className="text-teal-100 text-lg max-w-md">
                 Verify healthcare credentials instantly. Keep your team compliant.
