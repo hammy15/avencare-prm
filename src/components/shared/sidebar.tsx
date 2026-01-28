@@ -19,6 +19,7 @@ import {
   Search,
   Building2,
   Sparkles,
+  FileBarChart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -30,6 +31,7 @@ const navigation = [
   { name: 'Licenses', href: '/licenses', icon: FileCheck, badge: null },
   { name: 'Tasks', href: '/tasks', icon: ClipboardList, badge: null },
   { name: 'Verifications', href: '/verifications', icon: Shield, badge: null },
+  { name: 'Reports', href: '/reports', icon: FileBarChart, badge: null },
   { name: 'Import', href: '/imports', icon: Upload, badge: null },
 ];
 

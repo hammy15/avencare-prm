@@ -11,6 +11,9 @@ const badgeVariants = cva(
       variant: {
         default: "neu-badge",
         primary: "neu-badge neu-badge-primary",
+        secondary: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+        destructive: "bg-rose-500/20 text-rose-700 dark:text-rose-300",
+        outline: "border border-gray-200 bg-transparent text-gray-700 dark:border-gray-700 dark:text-gray-300",
         success: "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300",
         warning: "bg-amber-500/20 text-amber-700 dark:text-amber-300",
         danger: "bg-rose-500/20 text-rose-700 dark:text-rose-300",

@@ -1,0 +1,16 @@
+first_name,last_name,email,phone,state,license_number,credential_type,expiration_date,notes
+Sarah,Johnson,sarah.johnson@avencare.com,206-555-0101,WA,RN123456,RN,2025-06-15,Senior Nurse
+Michael,Chen,michael.chen@avencare.com,503-555-0202,OR,LPN789012,LPN,2024-12-31,Night shift supervisor
+Emily,Williams,emily.williams@avencare.com,208-555-0303,ID,CNA345678,CNA,2025-03-20,Weekend staff
+Robert,Garcia,robert.garcia@avencare.com,206-555-0404,WA,RN987654,RN,2024-08-15,Wound care specialist
+Jennifer,Martinez,jennifer.martinez@avencare.com,415-555-0505,CA,APRN112233,APRN,2025-11-30,Nurse practitioner
+David,Brown,david.brown@avencare.com,512-555-0606,TX,RN555666,RN,2025-01-10,ER experience
+Lisa,Anderson,lisa.anderson@avencare.com,206-555-0707,WA,LPN222333,LPN,2025-09-25,Medication management
+James,Taylor,james.taylor@avencare.com,503-555-0808,OR,CNA444555,CNA,,New hire - pending verification
+Amanda,Wilson,amanda.wilson@avencare.com,305-555-0909,FL,RN777888,RN,2025-04-18,Travel nurse
+Kevin,Thompson,kevin.thompson@avencare.com,206-555-1010,WA,RN999000,RN,2025-07-22,ICU trained
+Maria,Rodriguez,maria.rodriguez@avencare.com,480-555-1111,AZ,CNA111222,CNA,2025-02-28,Bilingual - Spanish
+Patricia,Lee,patricia.lee@avencare.com,907-555-1212,AK,LPN333444,LPN,2025-08-30,Remote site experience
+Christopher,White,chris.white@avencare.com,406-555-1313,MT,RN555777,RN,2025-05-15,Hospice certified
+Jessica,Harris,jessica.harris@avencare.com,503-555-1414,OR,APRN888999,APRN,2025-10-20,Pain management specialist
+Daniel,Clark,daniel.clark@avencare.com,208-555-1515,ID,RN111333,RN,2026-01-15,Charge nurse

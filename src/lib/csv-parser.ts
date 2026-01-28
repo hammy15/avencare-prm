@@ -49,6 +49,10 @@ const csvRowSchema = z.object({
 
 // Column name mappings (various formats people might use)
 const COLUMN_MAPPINGS: Record<string, keyof CSVRow> = {
+  // Full name (will be split)
+  name: 'first_name', // We'll handle splitting in the transform
+  'full name': 'first_name',
+  fullname: 'first_name',
   // First name variations
   first_name: 'first_name',
   firstname: 'first_name',
@@ -165,6 +169,15 @@ function validateRow(row: Record<string, string>, rowNumber: number): CSVValidat
   const cleanedRow: Record<string, string | undefined> = {};
   for (const [key, value] of Object.entries(row)) {
     cleanedRow[key] = value?.trim() || undefined;
+  }
+
+  // Handle combined "name" field - split into first_name and last_name
+  if (cleanedRow.first_name && !cleanedRow.last_name) {
+    const nameParts = cleanedRow.first_name.split(/\s+/);
+    if (nameParts.length >= 2) {
+      cleanedRow.first_name = nameParts[0];
+      cleanedRow.last_name = nameParts.slice(1).join(' ');
+    }
   }
 
   // Parse with zod
