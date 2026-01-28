@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { Header } from '@/components/shared/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReportActions } from '@/components/reports/report-actions';
 import { FileText, Users, Shield, TrendingUp, Calendar, AlertTriangle } from 'lucide-react';
 
 async function getReportStats() {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const [
     { count: totalPeople },

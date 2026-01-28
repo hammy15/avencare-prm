@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 
 export interface ComplianceReportData {
   generatedAt: string;
@@ -60,7 +60,7 @@ function getComplianceGrade(rate: number): string {
 }
 
 export async function generateComplianceReport(): Promise<ComplianceReportData> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const now = new Date();
   const ninetyDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
