@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auditLog } from '@/lib/audit';
 import { z } from 'zod';
 import type { CSVRow, CredentialType, ImportError } from '@/types/database';
@@ -26,7 +26,7 @@ const importSchema = z.object({
 // GET /api/import - List import batches
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { searchParams } = new URL(request.url);
 
     const page = parseInt(searchParams.get('page') || '1');
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 // POST /api/import - Process CSV import
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Auth is handled by middleware (cookie-based)
     // No Supabase user check needed for this simple auth model
