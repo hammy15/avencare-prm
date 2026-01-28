@@ -41,7 +41,7 @@ const US_STATES = [
   'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
 ];
 
-const CREDENTIAL_TYPES = ['RN', 'LPN', 'CNA', 'APRN', 'NP'] as const;
+const CREDENTIAL_TYPES = ['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP'] as const;
 const STATUS_OPTIONS = ['active', 'expired', 'needs_manual', 'flagged', 'unknown'] as const;
 
 const licenseSchema = z.object({

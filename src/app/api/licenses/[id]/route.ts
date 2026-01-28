@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auditLog } from '@/lib/audit';
 import { z } from 'zod';
 
@@ -7,7 +7,7 @@ const updateLicenseSchema = z.object({
   person_id: z.string().uuid('Invalid person ID').optional(),
   state: z.string().length(2, 'State must be 2 characters').optional(),
   license_number: z.string().min(1, 'License number is required').optional(),
-  credential_type: z.enum(['RN', 'LPN', 'CNA', 'APRN', 'NP']).optional(),
+  credential_type: z.enum(['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP']).optional(),
   status: z.enum(['active', 'expired', 'needs_manual', 'flagged', 'unknown']).optional(),
   expiration_date: z.string().optional().nullable(),
   is_compact: z.boolean().optional(),
@@ -25,7 +25,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { data, error } = await supabase
       .from('licenses')
@@ -74,7 +74,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();
@@ -163,7 +163,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Check if user is admin
     const { data: { user } } = await supabase.auth.getUser();

@@ -7,7 +7,7 @@ const createLicenseSchema = z.object({
   person_id: z.string().uuid('Invalid person ID'),
   state: z.string().length(2, 'State must be 2 characters'),
   license_number: z.string().min(1, 'License number is required'),
-  credential_type: z.enum(['RN', 'LPN', 'CNA', 'APRN', 'NP']),
+  credential_type: z.enum(['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP']),
   status: z.enum(['active', 'expired', 'needs_manual', 'flagged', 'unknown']).optional(),
   expiration_date: z.string().optional().nullable(),
   is_compact: z.boolean().optional(),

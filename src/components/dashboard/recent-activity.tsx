@@ -54,7 +54,7 @@ export function RecentActivity({ verifications }: RecentActivityProps) {
                     : 'Unknown'}
                 </Link>
                 <p className="text-sm text-gray-500">
-                  {verification.license.credential_type} - {verification.license.state} #{verification.license.license_number}
+                  {verification.license?.credential_type} - {verification.license?.state} #{verification.license?.license_number}
                 </p>
               </div>
               <div className="text-right space-y-1">

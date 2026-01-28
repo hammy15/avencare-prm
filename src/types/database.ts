@@ -2,7 +2,7 @@
 // These types mirror the Supabase schema
 
 export type UserRole = 'admin' | 'viewer';
-export type CredentialType = 'RN' | 'LPN' | 'CNA' | 'APRN' | 'NP';
+export type CredentialType = 'RN' | 'LPN' | 'LVN' | 'CNA' | 'APRN' | 'NP';
 export type LicenseStatus = 'active' | 'expired' | 'needs_manual' | 'flagged' | 'unknown';
 export type SourceType = 'bon' | 'cna_registry' | 'nursys' | 'other';
 export type RunType = 'manual' | 'automated' | 'import';

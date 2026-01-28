@@ -45,7 +45,7 @@ const US_STATES = [
   'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
 ];
 
-const CREDENTIAL_TYPES = ['RN', 'LPN', 'CNA', 'APRN', 'NP'] as const;
+const CREDENTIAL_TYPES = ['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP'] as const;
 
 // Step 1: License lookup info
 const lookupSchema = z.object({

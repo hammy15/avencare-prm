@@ -14,7 +14,7 @@ const quickVerifySchema = z.object({
   license: z.object({
     state: z.string().min(2),
     license_number: z.string().min(1),
-    credential_type: z.enum(['RN', 'LPN', 'CNA', 'APRN', 'NP']),
+    credential_type: z.enum(['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP']),
     status: z.enum(['active', 'expired', 'needs_manual', 'flagged', 'unknown']),
     expiration_date: z.string().optional().nullable(),
   }),

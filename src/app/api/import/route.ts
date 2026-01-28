@@ -4,7 +4,7 @@ import { auditLog } from '@/lib/audit';
 import { z } from 'zod';
 import type { CSVRow, CredentialType, ImportError } from '@/types/database';
 
-const CREDENTIAL_TYPES = ['RN', 'LPN', 'CNA', 'APRN', 'NP'] as const;
+const CREDENTIAL_TYPES = ['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP'] as const;
 
 const importRowSchema = z.object({
   first_name: z.string().min(1),

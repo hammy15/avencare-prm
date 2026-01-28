@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { CSVRow, CSVValidationResult, CredentialType } from '@/types/database';
 
 // Valid credential types
-const CREDENTIAL_TYPES = ['RN', 'LPN', 'CNA', 'APRN', 'NP'] as const;
+const CREDENTIAL_TYPES = ['RN', 'LPN', 'LVN', 'CNA', 'APRN', 'NP'] as const;
 
 // US State codes
 const STATE_CODES = [

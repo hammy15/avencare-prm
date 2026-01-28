@@ -1,13 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const APP_PASSWORD = process.env.APP_PASSWORD || 'jockibox26';
+const APP_PASSWORD = process.env.APP_PASSWORD;
+
+if (!APP_PASSWORD) {
+  console.error('CRITICAL: APP_PASSWORD environment variable is not set');
+}
 const AUTH_COOKIE_NAME = 'avencare_auth';
 const AUTH_TOKEN = 'authenticated_user_session';
 
 export async function POST(request: NextRequest) {
   try {
     const { password } = await request.json();
+
+    if (!APP_PASSWORD) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
 
     if (!password) {
       return NextResponse.json({ error: 'Password is required' }, { status: 400 });
